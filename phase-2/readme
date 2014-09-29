@@ -1,0 +1,11 @@
+Implemented "visitor design pattern" 
+
+Require: jflex and baccj (Java Implementation)
+
+Steps to run:
+
+jflex decaf.l
+byaccj -J parser.y
+javac Ast.java
+javac Parser.java
+java Parser

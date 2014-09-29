@@ -1,0 +1,4 @@
+flex lexer.l
+bison -d -v parser.y
+cc -o decaf parser.tab.c lex.yy.c -ly -ll
+
