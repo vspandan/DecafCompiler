@@ -54,7 +54,7 @@ method_decl  : type ID  '(' args_decl ')' block method_decl
 						}
 	     | VOID ID  '(' args_decl ')' block method_decl 
 	     				{	ArrayList<DeclarationsIntf> methodDecls2= ((ArrayList<DeclarationsIntf>)$7.obj); 
-	     					methodDecls2.add(new MethodDeclaration2((Void)$1.obj,new Identifier($2.sval),(ArrayList<Arguement>)$4.obj,(Block)$6.obj));
+	     					methodDecls2.add(new MethodDeclaration2(new Void($1.sval),new Identifier($2.sval),(ArrayList<Arguement>)$4.obj,(Block)$6.obj));
 	     					$$.obj =methodDecls2;
 	     				}
 	     | 				{	$$.obj = new ArrayList<MethodDeclarations>();	}

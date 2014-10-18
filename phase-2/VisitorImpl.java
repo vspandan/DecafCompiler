@@ -221,7 +221,7 @@ public class VisitorImpl implements Visitor {
 		System.out.print(" CALLOUT F'n CALL:");
 		methodStatementCallOut1.s.accept(this);
 		System.out.print("(");
-		System.out.print(methodStatementCallOut1.s1);
+		methodStatementCallOut1.s1.accept(this);
 		System.out.print(" , ");
 		for (callout_arg arg : methodStatementCallOut1.calloutargs)
 			arg.accept(this);
@@ -234,7 +234,7 @@ public class VisitorImpl implements Visitor {
 		System.out.print(" CALLOUT F'n CALL:");
 		methodStatementCallOut2.s.accept(this);
 		System.out.print("(");
-		System.out.print(methodStatementCallOut2.s1);
+		methodStatementCallOut2.s1.accept(this);
 		System.out.print(")");
 
 	}
