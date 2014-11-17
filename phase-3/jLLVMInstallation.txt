@@ -1,0 +1,40 @@
+
+Download Following packages
+
+	llvm-3.2
+	clang-3.2(optional)
+	compiler-rt-3.2(optional)
+	jllvm3.2	
+	    (http://code.google.com/p/jllvm/)	
+	cmake(if not installed before)
+		
+
+Move Clang and Compiler-RT in following relative locations
+
+	clang-> llvm-3.2/tools/
+	compiler-rt ->/llvm-3.2/projects/
+
+Configure LLVM
+	./configure
+
+Compile LLVM source files using make
+	makei
+
+Add llvm bin path to env variables
+	gedit ~/.bashrc
+	export PATH=$PATH:~/llvm/build/Release+Asserts/bin
+
+Add LLVM libraries
+	gedit /etc/ld.so.conf.d/llvm.conf
+	/home/<your_user_name>/llvm/build/Release+Asserts/lib
+
+Build JLLVM
+	build packages using ant
+	ant build
+
+Copy libjllvm.so to system library locations
+	one of the following location
+		/usr/lib
+		/us/local/lib
+
+Use jllvm.jar for building compiler source files

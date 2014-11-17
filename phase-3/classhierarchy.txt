@@ -1,0 +1,71 @@
+DecafIntf(A)
+------>	Decaf_Class
+------>	DeclarationsIntf(A)
+	------>	FieldDeclIntf(A)
+		------>	FieldDecl
+	------> MethodDeclarations(A)		
+		------> MethodDeclarations1
+		------> MethodDeclarations2
+
+Var_Decl
+
+Fields(A)
+------> Field
+------> Fields1
+  
+Arguement(A)
+------>	Arguement1
+------>	Arguement2
+
+Type
+------>	IntegerType
+------>	BooleanType
+------>	Void
+
+ExpressionIntf(A)
+------> StatementIntf(A)
+	-----> Statement1
+	-----> ReturnStatemen1
+	-----> ReturnStatement2
+	-----> BreakStatement
+	-----> ContinueStatement
+	-----> IfStatement
+	-----> ElseStatement
+	-----> ForStatement
+	-----> Block(A)
+		------>	Block1	
+		------> BLock2
+		------>	Block3
+		------>	Block4
+	----->	MethodStatement1
+	----->	MethodStatement2
+	----->	MethodStatementCallOut1
+	----->	MethodStatementCallOut2
+
+-----> callout_args(A)
+		------>	callout_arg
+		------>	callout_arg1
+----->	Location(A)
+	------>	Location1
+	------>	Location2
+----->	Expression1
+----->	Expression2
+----->	Expression3
+----->	Literal
+	------>	IntegerLiteral
+	------>	BooleanLiteral
+	------> StringLiteral
+
+
+
+
+Class
+Identifier
+IF
+Else
+Return
+Break
+Continue
+For
+Callout
+

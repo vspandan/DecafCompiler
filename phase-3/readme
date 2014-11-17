@@ -1,0 +1,15 @@
+Implemented "visitor design pattern" 
+
+Require: jflex,baccj,jllvm,LLVM3.2 (Java Implementation)
+
+Steps to run:
+
+jflex decaf.l
+byaccj -J parser.y
+javac -cp "../jllvm.jar" -d ../bin *.java
+java -cp ".:../jllvm.jar" Parser
+
+llvm-dis -f p.bc -o p.l
+lli p.l
+
+clang s.c -S -emit-llvm
