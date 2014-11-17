@@ -71,6 +71,7 @@ public class VisitorImpl implements Visitor {
 	boolean operandIncompatible = false;
 	boolean isForStatement = false;
 	boolean isMainFunc = false;
+	boolean isBoolFunc = false;
 
 	@Override
 	public LLVMValue visit(Decaf_Class decaf_Class) {
@@ -196,6 +197,8 @@ public class VisitorImpl implements Visitor {
 		LLVMType typeLLVM = methodDeclaration1.type.accept(this);
 		if (typeLLVM instanceof LLVMIntegerType) {
 
+			if (typeLLVM.equals(LLVMIntegerType.i1))
+				isBoolFunc = true;
 			String functionName = methodDeclaration1.id.accept(this);
 			if (namedValues.containsKey(functionName)) {
 				System.err.println(functionName + ": IDentifier already used");
@@ -326,6 +329,10 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(Statement1 statement1) {
 		LLVMValue rhs = statement1.expr.accept(this);
 		String idLHS = statement1.loc.id.id;
+		if(rhs==null){
+			errorFlag=true;
+			return null;
+		}
 		if (rhs.typeOf() instanceof LLVMVoidType) {
 			System.err.println("Invalid Operand: void function found");
 			errorFlag = true;
@@ -344,7 +351,6 @@ public class VisitorImpl implements Visitor {
 				new LLVMStoreInstruction(builder, rhs, v1);
 				return null;
 			}
-
 			switch (statement1.op) {
 			case "=":
 				new LLVMStoreInstruction(builder, rhs, v);
@@ -391,6 +397,11 @@ public class VisitorImpl implements Visitor {
 		LLVMValue val = returnStatement1.expr.accept(this);
 
 		if (!operandIncompatible) {
+			if(val==null){
+				errorFlag=true;
+				return null
+						;
+			}
 			if (val.typeOf() instanceof LLVMVoidType) {
 				errorFlag = true;
 				System.err.println("Void Function doesn't return any value");
@@ -399,13 +410,28 @@ public class VisitorImpl implements Visitor {
 			if (!(val.typeOf() instanceof LLVMIntegerType)) {
 				val = new LLVMLoadInstruction(builder, val, "ret");
 			}
-			if (val.typeOf() instanceof LLVMIntegerType
-					&& (((LLVMIntegerType) val.typeOf()).getWidth() == 1)) {
-				System.err
-						.println("incompatible return type : int expected; boolean found");
-				errorFlag = true;
-			} else
-				new LLVMReturnInstruction(builder, val);
+			if (val.typeOf() instanceof LLVMIntegerType) {
+				if (isBoolFunc) {
+					isBoolFunc = false;
+					if (((LLVMIntegerType) val.typeOf()).getWidth() == 1) {
+						//new LLVMBitCast(builder, val, LLVMIntegerType.i32, "bool2int");
+						new LLVMReturnInstruction(builder, val);
+					} else {
+						System.err
+								.println("incompatible return type : boolean expected; int found");
+						errorFlag = true;
+					}
+				} else {
+					if (((LLVMIntegerType) val.typeOf()).getWidth() == 1) {
+						System.err
+								.println("incompatible return type : int expected; boolean found");
+						errorFlag = true;
+					}
+					new LLVMReturnInstruction(builder, val);
+				}
+				
+			}
+
 		} else {
 			System.err.println("Operand Incompatible");
 			errorFlag = true;
@@ -648,6 +674,10 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(Expression1 expression1) {
 		LLVMValue lhs = expression1.expr.accept(this);
 		LLVMValue rhs = expression1.term1.accept(this);
+		if(rhs==null||lhs==null){
+			errorFlag=true;
+			return null;
+		}
 		if (!(lhs.typeOf() instanceof LLVMIntegerType)) {
 			lhs = new LLVMLoadInstruction(builder, lhs, "1");
 		}
@@ -669,7 +699,7 @@ public class VisitorImpl implements Visitor {
 					"mul instruction");
 		case "%":
 			return new LLVMRemainderInstruction(builder, lhs, rhs,
-					RemainderType.FLOAT, "mod1");
+					RemainderType.UNSIGNEDINT, "mod1");
 
 		case ">":
 			return new LLVMIntegerComparison(builder,
@@ -946,9 +976,6 @@ public class VisitorImpl implements Visitor {
 							args1[i++] = new LLVMLoadInstruction(builder,
 									exprVal, "1" + i);
 						else
-							// args1[i++] = new LLVMLoadInstruction(builder,new
-							// LLVMStackAllocation(builder, LLVMIntegerType.i32,
-							// exprVal, ""+i),"1"+i);
 							args1[i++] = exprVal;
 					}
 
@@ -993,6 +1020,10 @@ public class VisitorImpl implements Visitor {
 
 		for (ExpressionIntf callout_arg : methodStatementCallOut1.calloutargs) {
 			LLVMValue arg = callout_arg.accept(this);
+			if(arg==null){
+				errorFlag=true;
+				return null;
+			}
 			if (arg.typeOf() instanceof LLVMIntegerType) {
 				args[i++] = arg;
 				continue;
