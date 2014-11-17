@@ -36,14 +36,6 @@ import org.jllvm.bindings.LLVMIntPredicate;
 import org.jllvm.bindings.LLVMLinkage;
 import org.jllvm.bindings.LLVMVerifierFailureAction;
 
-/*
- * 
- * TODO: 
- * 1. Array Value
- * 2. Callout;; system library calling.
- * 3. Segmentation Fault
- */
-
 public class VisitorImpl implements Visitor {
 	static {
 		System.loadLibrary("jllvm");
@@ -64,7 +56,7 @@ public class VisitorImpl implements Visitor {
 	LLVMFunction forFunc = null;
 
 	boolean hasMainFunc = false; // disable this flag for removing main method
-									// constraint
+								// constraint
 	boolean funcReturnReq = false;
 	boolean errorFlag = false;
 	boolean breakOrContStat = false;
@@ -329,8 +321,8 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(Statement1 statement1) {
 		LLVMValue rhs = statement1.expr.accept(this);
 		String idLHS = statement1.loc.id.id;
-		if(rhs==null){
-			errorFlag=true;
+		if (rhs == null) {
+			errorFlag = true;
 			return null;
 		}
 		if (rhs.typeOf() instanceof LLVMVoidType) {
@@ -350,6 +342,23 @@ public class VisitorImpl implements Visitor {
 
 				new LLVMStoreInstruction(builder, rhs, v1);
 				return null;
+			}
+			if (v.typeOf() instanceof LLVMPointerType) {
+				// TODO optimize this..
+
+				if (((LLVMPointerType) v.typeOf()).getElementType() instanceof LLVMIntegerType
+						&& rhs.typeOf() instanceof LLVMIntegerType) {
+					long lw = ((LLVMIntegerType) ((LLVMPointerType) v.typeOf())
+							.getElementType()).getWidth();
+					long rw = ((LLVMIntegerType) rhs.typeOf()).getWidth();
+					if (lw != rw) {
+						operandIncompatible = true;
+						errorFlag = true;
+						return null;
+					}
+
+				}
+
 			}
 			switch (statement1.op) {
 			case "=":
@@ -397,10 +406,9 @@ public class VisitorImpl implements Visitor {
 		LLVMValue val = returnStatement1.expr.accept(this);
 
 		if (!operandIncompatible) {
-			if(val==null){
-				errorFlag=true;
-				return null
-						;
+			if (val == null) {
+				errorFlag = true;
+				return null;
 			}
 			if (val.typeOf() instanceof LLVMVoidType) {
 				errorFlag = true;
@@ -414,7 +422,6 @@ public class VisitorImpl implements Visitor {
 				if (isBoolFunc) {
 					isBoolFunc = false;
 					if (((LLVMIntegerType) val.typeOf()).getWidth() == 1) {
-						//new LLVMBitCast(builder, val, LLVMIntegerType.i32, "bool2int");
 						new LLVMReturnInstruction(builder, val);
 					} else {
 						System.err
@@ -429,7 +436,7 @@ public class VisitorImpl implements Visitor {
 					}
 					new LLVMReturnInstruction(builder, val);
 				}
-				
+
 			}
 
 		} else {
@@ -674,10 +681,11 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(Expression1 expression1) {
 		LLVMValue lhs = expression1.expr.accept(this);
 		LLVMValue rhs = expression1.term1.accept(this);
-		if(rhs==null||lhs==null){
-			errorFlag=true;
+		if (rhs == null || lhs == null) {
+			errorFlag = true;
 			return null;
 		}
+
 		if (!(lhs.typeOf() instanceof LLVMIntegerType)) {
 			lhs = new LLVMLoadInstruction(builder, lhs, "1");
 		}
@@ -685,6 +693,14 @@ public class VisitorImpl implements Visitor {
 			rhs = new LLVMLoadInstruction(builder, rhs, "2");
 		}
 		String op = expression1.operator;
+
+		long lw = ((LLVMIntegerType) lhs.typeOf()).getWidth();
+		long rw = ((LLVMIntegerType) rhs.typeOf()).getWidth();
+		if (lw != rw) {
+			operandIncompatible = true;
+			errorFlag = true;
+			return null;
+		}
 
 		switch (op) {
 		case "+":
@@ -971,12 +987,21 @@ public class VisitorImpl implements Visitor {
 					LLVMValue exprVal = null;
 					int i = 0;
 					for (ExpressionIntf expr : methodStatement2.exprs) {
+						
+						
 						exprVal = expr.accept(this);
 						if (exprVal instanceof LLVMStackAllocation)
 							args1[i++] = new LLVMLoadInstruction(builder,
 									exprVal, "1" + i);
 						else
 							args1[i++] = exprVal;
+						long lw=((LLVMIntegerType)args1[i-1].typeOf()).getWidth();
+						long rw=((LLVMIntegerType)f.getParameter(i-1).typeOf()).getWidth();
+						if(lw!=rw){
+							System.err.println("Formal and actual parameters are not type compatible");
+							errorFlag=true;
+							return null;
+						}
 					}
 
 					return new LLVMCallInstruction(builder, f, args1, "");
@@ -1020,8 +1045,8 @@ public class VisitorImpl implements Visitor {
 
 		for (ExpressionIntf callout_arg : methodStatementCallOut1.calloutargs) {
 			LLVMValue arg = callout_arg.accept(this);
-			if(arg==null){
-				errorFlag=true;
+			if (arg == null) {
+				errorFlag = true;
 				return null;
 			}
 			if (arg.typeOf() instanceof LLVMIntegerType) {
@@ -1034,7 +1059,7 @@ public class VisitorImpl implements Visitor {
 			}
 			if (arg.typeOf() instanceof LLVMVoidType) {
 				System.err.println("Invalid Operand: void function found");
-				errorFlag=true;
+				errorFlag = true;
 				return null;
 			}
 			long p = ((LLVMArrayType) arg.typeOf()).getLength();

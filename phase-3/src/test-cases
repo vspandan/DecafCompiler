@@ -13,6 +13,8 @@ class p{ int a; int b; int main(){ callout("printf","spandan",a); return 0;}}
 class p{ int a; int b; int main(){ callout("printf","spandan %d",a); return 0;}}
 class p{ int a; int b; int main(){ callout("printf","spandan %d",10); return 0;}}
 class p{ int a; int b; void ab(){ for i=0, 3 { a=10; if(a!=10){ break;} else { a=200;}}} int main(){callout("printf","%d\n",ab());return 0;}}//should fail printing void value
+class p{ boolean ab(boolean a,boolean b){return b;}  int main() { callout("printf","%d", ab(true,true)); return 0; }}
+class p{ boolean ab(boolean a,boolean b){return b;}  int main() { boolean pl;pl=ab(true,true);callout("printf","%d", pl); return 0; }}
 
 //callout without arg
 class p{ int main(){ callout("printf"); return 0;}}
@@ -27,7 +29,8 @@ class p{ int ab(int a){return 0;} int s(){int arg; arg=90; ab(arg); return 0;} i
 
 class p{ int ab(int a,int b){return true;}  int main() { callout("printf","%d", ab(3,4)); return 0; }}//should fail
 class p{ boolean ab(int a,int b){return b;}  int main() { callout("printf","%d", ab(3,4)); return 0; }}//should fail
-
+class p{ boolean ab(boolean a,boolean b){return b;}  int main() { int pl;pl=ab(true,true);callout("printf","%d", pl); return 0; }}//should fail
+class p{ boolean ab(boolean a,boolean b){return b;}  int main() { int pl;pl=8+ab(true,true);callout("printf","%d", pl); return 0; }}//should fail
 
 //using return values of method statements;
 
