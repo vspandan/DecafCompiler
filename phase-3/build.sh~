@@ -1,0 +1,6 @@
+dir=bin
+if [ ! -d "/bin"]; then
+	mkdir bin
+else
+javac -cp jllvm.jar -d bin/ src/*.java
+fi

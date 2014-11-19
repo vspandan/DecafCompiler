@@ -1,0 +1,16 @@
+class factorial{ 
+	int fact(int n){ 
+		int f; 
+		f=1;
+		for i=0, n {
+			f=f*(i+1);
+		}
+		return f;
+	}
+	int main(){ 
+		callout("printf","%d", fact(5)); 
+		return 0;
+	}
+}
+
+

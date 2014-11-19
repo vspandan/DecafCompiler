@@ -281,8 +281,18 @@ literal  : INT_LITERAL  {	$$.obj = new IntegerLiteral($1.ival);	}
 
   
   public static void main(String args[]) throws IOException {
-  
-  	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+  	BufferedReader br = null;
+  	if(args.length > 0){
+  		File f = new File(args[0]);
+  		if(!f.exists())
+  		{
+  			System.err.println(args[0]+": File doesn't exist");
+  			System.exit(1);
+  		}
+  		br = new BufferedReader(new InputStreamReader(new FileInputStream(args[0])));
+  	}
+  	else
+  		br = new BufferedReader(new InputStreamReader(System.in));
     Parser yyparser = new Parser(br);
     yyparser.yyparse();
         

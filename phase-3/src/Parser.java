@@ -485,13 +485,23 @@ final static String yyrule[] = {
 
   
   public static void main(String args[]) throws IOException {
-  
-  	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+  	BufferedReader br = null;
+  	if(args.length > 0){
+  		File f = new File(args[0]);
+  		if(!f.exists())
+  		{
+  			System.err.println(args[0]+": File doesn't exist");
+  			System.exit(1);
+  		}
+  		br = new BufferedReader(new InputStreamReader(new FileInputStream(args[0])));
+  	}
+  	else
+  		br = new BufferedReader(new InputStreamReader(System.in));
     Parser yyparser = new Parser(br);
     yyparser.yyparse();
         
   }
-//#line 423 "Parser.java"
+//#line 433 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1008,7 +1018,7 @@ case 73:
 //#line 251 "parser.y"
 {	yyval.obj = new BooleanLiteral(val_peek(0).sval);	}
 break;
-//#line 935 "Parser.java"
+//#line 945 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

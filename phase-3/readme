@@ -1,15 +1,24 @@
 Implemented "visitor design pattern" 
 
 Require: jflex,baccj,jllvm,LLVM3.2 (Java Implementation)
+	Read jLLVMInstallation.txt for installation steps
 
-Steps to run:
+Generate scanner and parser output files
 
-jflex decaf.l
-byaccj -J parser.y
-javac -cp "../jllvm.jar" -d ../bin *.java
-java -cp ".:../jllvm.jar" Parser
+	Flex: jflex decaf.l
+	YACC: byaccj -J parser.y
 
-llvm-dis -f p.bc -o p.l
-lli p.l
+Steps to Compile programs:
 
-clang s.c -S -emit-llvm
+	build.sh --- compiles the source
+	run.sh [-llvm-ir] [<filename>]
+
+To build and compile manually:
+
+	javac -cp "../jllvm.jar" -d ../bin *.java
+	java -cp ".:../jllvm.jar" Parser [<filename>]
+	llvm-dis -f decaf.output -o <filename1>
+	lli <filename1>
+
+To use clang for generating LLVM-IR:
+	clang s.c -S -emit-llvm

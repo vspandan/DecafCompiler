@@ -76,19 +76,23 @@ public class VisitorImpl implements Visitor {
 				decl.accept(this);
 			}
 
-			String className = decaf_Class.id.accept(this);
-			String llvmBitCodeFileName = className + ".bc";
+			/*
+			 * Disabling output file name to be class name; for time being seting it to default
+			 */
+			//String className = decaf_Class.id.accept(this);
+			//String llvmBitCodeFileName = className + ".bc";
+			String llvmBitCodeFileName = "decaf.out";
 			File file = new File(llvmBitCodeFileName);
 			if (file.exists())
 				file.delete();
 
 			if (!errorFlag) {
 				if (hasMainFunc) {
-					module.writeBitcodeToFile(llvmBitCodeFileName);
+					//module.writeBitcodeToFile(llvmBitCodeFileName);
 					Analysis.LLVMVerifyModule(module.getInstance(),
 							LLVMVerifierFailureAction.LLVMPrintMessageAction,
 							null);
-					// module.writeBitcodeToFile(llvmBitCodeFileName);
+					module.writeBitcodeToFile(llvmBitCodeFileName);
 					// ex.linkInJit();
 					// ex.runFunction(module.getNamedFunction("main"), new
 					// LLVMGenericValue[]{});
@@ -889,6 +893,9 @@ public class VisitorImpl implements Visitor {
 			forBody = forFunc.appendBasicBlock("for.body");
 			forInc = forFunc.appendBasicBlock("for.inc");
 			forEnd = forFunc.appendBasicBlock("for.end");
+			if(condVal.typeOf() instanceof LLVMPointerType){
+				condVal=new LLVMLoadInstruction(builder, condVal, "%1");
+			}
 			if (initialVal.typeOf() instanceof LLVMIntegerType
 					&& condVal.typeOf() instanceof LLVMIntegerType) {
 				LLVMValue cmpResult = null;
