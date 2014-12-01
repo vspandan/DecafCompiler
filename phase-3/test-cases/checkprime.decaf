@@ -1,0 +1,22 @@
+class p {
+	int main()
+	{
+		int n, i, ind;
+		ind=0;
+		n=29;
+		for i=3,(n/2+1){
+		      if((n%i)==0)
+		      {
+			  ind=1;
+			  break;
+		      }
+		}	
+		if (ind==0) {
+		      callout("printf","%d is prime",n);
+		}
+		else {
+		      callout("printf","%d is not prime",n);
+		}
+	  return 0;
+	}
+}

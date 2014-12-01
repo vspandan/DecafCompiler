@@ -1,0 +1,32 @@
+class findmax {
+
+
+  int b[5]; 
+int main()
+{
+	int maximum, size;
+	size=5;
+	b[0]=60;
+	b[1]=97;
+	b[2]=88;
+	b[3]=90;
+        b[4]=10;
+ 
+
+  maximum = b[0];
+ 
+  for c = 1, size
+  {
+
+    if (b[c] > maximum)
+    {
+       maximum  = b[c];
+
+       
+    }
+  }
+ 
+  callout("printf","Maximum element %d.\n",maximum);
+  return 0;
+}
+}

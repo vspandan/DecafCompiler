@@ -1,4 +1,4 @@
-class ArithDemo
+class arithDemo
 {
     int main () 
     {
@@ -27,11 +27,7 @@ class ArithDemo
         if (c > b) { callout("printf", "c > b is incorrect\n"); }
         if (c >= b) { callout("printf", "c >= b is correct\n"); }
 
-        if (a == a) { callout("printf", "a == a is correct\n"); }
         
-        
-        if ((a == a) && (b == c))
-            { callout("printf", "true and true is correct\n"); }
         
                    
            return 0;

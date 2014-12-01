@@ -1,0 +1,25 @@
+class arrayDotProd{
+	 int a[5],b[5];
+    int main(){
+	int n,sum;
+	n=5;
+
+        a[0]=1;
+	a[1]=2;
+	a[2]=3;
+	a[3]=4;
+	a[4]=5;
+	b[0]=6;
+	b[1]=7;
+	b[2]=8;
+	b[3]=9;
+        b[4]=10;
+        
+        for i=0,n{
+            sum += a[i]*b[i];
+        }
+        
+        callout("printf","Dot Product %d",sum);
+        return 0;
+    }
+}

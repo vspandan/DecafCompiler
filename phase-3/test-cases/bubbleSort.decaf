@@ -1,0 +1,35 @@
+class bubblesort{
+int arr[30];
+int main() {
+	int num, temp;
+	num=10;
+	arr[0]=90;
+	arr[1]=87;
+	arr[2]=109;
+	arr[3]=73;
+	arr[4]=38;
+	arr[5]=92;
+	arr[6]=73;
+	arr[7]=98;
+	arr[8]=100;
+	arr[9]=10;
+
+ 
+   	for i = 1, num{
+	      	for j = 0,( num - 1){
+			if (arr[j] > arr[j + 1]) {
+		   		temp = arr[j];
+		    		arr[j] = arr[j + 1];
+		    		arr[j + 1] = temp;
+			 }
+	      	}
+ 
+	}
+      	
+      	for d=0,num{
+		callout ("printf", " -%d- ",arr[d]); 
+	}
+	return 0;
+	  	
+   }
+}

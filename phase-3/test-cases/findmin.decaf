@@ -1,0 +1,32 @@
+class findmin {
+
+
+  int b[5]; 
+int main()
+{
+	int min, size;
+	size=5;
+	b[0]=60;
+	b[1]=97;
+	b[2]=88;
+	b[3]=9;
+        b[4]=10;
+ 
+
+  min = b[0];
+ 
+  for c = 1, size
+  {
+
+    if (min > b[c])
+    {
+       min  = b[c];
+
+       
+    }
+  }
+ 
+  callout("printf","Minimum element %d.\n",min);
+  return 0;
+}
+}

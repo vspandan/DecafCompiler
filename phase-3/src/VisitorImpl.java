@@ -1,4 +1,5 @@
 import java.io.File;
+
 import org.jllvm.LLVMAddInstruction;
 import org.jllvm.LLVMBasicBlock;
 import org.jllvm.LLVMCallInstruction;
@@ -42,21 +43,18 @@ public class VisitorImpl implements Visitor {
 
 	}
 	LLVMExecutionEngine ex = null;
-	LLVMBasicBlock ifelse = null;
-	LLVMBasicBlock ifend = null;
-	LLVMFunction iffunc = null;
+
+	LLVMFunction iffunc1 = null;;
+	LLVMBasicBlock ifelse1 = null;
+	LLVMBasicBlock ifend1 = null;
 
 	LLVMBasicBlock fblock = null;
 	LLVMFunction f = null;;
-
-	LLVMBasicBlock forCond = null;
-	LLVMBasicBlock forInc = null;
-	LLVMBasicBlock forBody = null;
-	LLVMBasicBlock forEnd = null;
-	LLVMFunction forFunc = null;
+	LLVMBasicBlock forInc1 = null;
+	LLVMBasicBlock forEnd1 = null;
 
 	boolean hasMainFunc = false; // disable this flag for removing main method
-								// constraint
+									// constraint
 	boolean funcReturnReq = false;
 	boolean errorFlag = false;
 	boolean breakOrContStat = false;
@@ -77,10 +75,11 @@ public class VisitorImpl implements Visitor {
 			}
 
 			/*
-			 * Disabling output file name to be class name; for time being seting it to default
+			 * Disabling output file name to be class name; for time being
+			 * seting it to default
 			 */
-			//String className = decaf_Class.id.accept(this);
-			//String llvmBitCodeFileName = className + ".bc";
+			// String className = decaf_Class.id.accept(this);
+			// String llvmBitCodeFileName = className + ".bc";
 			String llvmBitCodeFileName = "decaf.out";
 			File file = new File(llvmBitCodeFileName);
 			if (file.exists())
@@ -88,7 +87,7 @@ public class VisitorImpl implements Visitor {
 
 			if (!errorFlag) {
 				if (hasMainFunc) {
-					//module.writeBitcodeToFile(llvmBitCodeFileName);
+					// module.writeBitcodeToFile(llvmBitCodeFileName);
 					Analysis.LLVMVerifyModule(module.getInstance(),
 							LLVMVerifierFailureAction.LLVMPrintMessageAction,
 							null);
@@ -584,14 +583,19 @@ public class VisitorImpl implements Visitor {
 	@Override
 	public LLVMValue visit(IfStatement ifStatement) {
 
-		iffunc = builder.getInsertBlock().getParent();
-		ifelse = iffunc.appendBasicBlock("if.then");
-		ifend = iffunc.appendBasicBlock("if.end");
-
 		ifStatement.s1.accept(this);
 
+		LLVMFunction iffunc = builder.getInsertBlock().getParent();
+		LLVMBasicBlock ifelse = iffunc.appendBasicBlock("if.then");
+		LLVMBasicBlock ifend = iffunc.appendBasicBlock("if.end");
+		
 		LLVMValue cond = ifStatement.expr.accept(this);
+		
+		this.iffunc1 = iffunc;
+		this.ifend1 = ifend;
+		this.ifelse1 = ifelse;
 		if (!operandIncompatible) {
+
 			if (cond != null) {
 				new LLVMBranchInstruction(builder, cond, ifelse, ifend);
 				builder.positionBuilderAtEnd(ifelse);
@@ -626,33 +630,44 @@ public class VisitorImpl implements Visitor {
 
 	@Override
 	public LLVMValue visit(IfElseStatement ifElseStatement) {
-		iffunc = builder.getInsertBlock().getParent();
-		ifelse = iffunc.appendBasicBlock("if.then");
-		ifend = iffunc.appendBasicBlock("if.end");
 
 		ifElseStatement.s1.accept(this);
 		ifElseStatement.s2.accept(this);
+		
+		LLVMFunction iffunc = builder.getInsertBlock().getParent();
+		LLVMBasicBlock ifelse = iffunc.appendBasicBlock("if.then");
+		LLVMBasicBlock ifend = iffunc.appendBasicBlock("if.end");
+		LLVMBasicBlock ifelseend = iffunc.appendBasicBlock("ifelse.end");
+		this.iffunc1 = iffunc;
+		this.ifend1 = ifend;
+		this.ifelse1 = ifelse;
+		
 		LLVMValue cond = ifElseStatement.expr.accept(this);
+		
 		if (!operandIncompatible) {
 			if (cond != null) {
 				new LLVMBranchInstruction(builder, cond, ifelse, ifend);
 				builder.positionBuilderAtEnd(ifelse);
 				ifElseStatement.ifBlock.accept(this);
 				if (!breakOrContStat) {
-					new LLVMBranchInstruction(builder, ifend);
+					new LLVMBranchInstruction(builder, ifelseend);
 				}
 				breakOrContStat = false;
 				builder.positionBuilderAtEnd(ifend);
 				ifElseStatement.elseBlock.accept(this);
+				new LLVMBranchInstruction(builder, ifelseend);
+				builder.positionBuilderAtEnd(ifelseend);
 			} else {
 				builder.positionBuilderAtEnd(ifelse);
 				ifElseStatement.ifBlock.accept(this);
 				if (!breakOrContStat) {
-					new LLVMBranchInstruction(builder, ifend);
+					new LLVMBranchInstruction(builder, ifelseend);
 				}
 				breakOrContStat = false;
 				builder.positionBuilderAtEnd(ifend);
 				ifElseStatement.elseBlock.accept(this);
+				new LLVMBranchInstruction(builder, ifelseend);
+				builder.positionBuilderAtEnd(ifelseend);
 			}
 		} else {
 			builder.positionBuilderAtEnd(ifelse);
@@ -726,13 +741,13 @@ public class VisitorImpl implements Visitor {
 					LLVMIntPredicate.LLVMIntSGT, lhs, rhs, "gt1");
 		case "<":
 			return new LLVMIntegerComparison(builder,
-					LLVMIntPredicate.LLVMIntSLT, rhs, lhs, "lt1");
+					LLVMIntPredicate.LLVMIntSLT, lhs, rhs, "lt1");
 		case ">=":
 			return new LLVMIntegerComparison(builder,
 					LLVMIntPredicate.LLVMIntSGE, lhs, rhs, "ge1");
 		case "<=":
 			return new LLVMIntegerComparison(builder,
-					LLVMIntPredicate.LLVMIntSLE, rhs, lhs, "le1");
+					LLVMIntPredicate.LLVMIntSLE, lhs, rhs, "le1");
 		case "==":
 			return new LLVMIntegerComparison(builder,
 					LLVMIntPredicate.LLVMIntEQ, rhs, lhs, "eq1");
@@ -740,40 +755,40 @@ public class VisitorImpl implements Visitor {
 			return new LLVMIntegerComparison(builder,
 					LLVMIntPredicate.LLVMIntNE, rhs, lhs, "neq1");
 		case "||":
-
-			LLVMValue cmp1 = new LLVMIntegerComparison(builder,
-					LLVMIntPredicate.LLVMIntEQ, lhs,
-					LLVMConstantInteger.constantInteger(LLVMIntegerType.i1, 0,
-							false), "orOp1");
-			LLVMBasicBlock nextCond = iffunc.appendBasicBlock("next");
-			new LLVMBranchInstruction(builder, cmp1, nextCond, ifelse);
-			builder.positionBuilderAtEnd(nextCond);
-			LLVMValue cmp2 = new LLVMIntegerComparison(builder,
-					LLVMIntPredicate.LLVMIntEQ, rhs,
-					LLVMConstantInteger.constantInteger(LLVMIntegerType.i1, 0,
-							false), "orOp2");
-			new LLVMBranchInstruction(builder, cmp2, ifend, ifelse);
+			if (rw == 1 && lw == 1) {
+				LLVMValue cmp1 = new LLVMIntegerComparison(builder,
+						LLVMIntPredicate.LLVMIntEQ, lhs,
+						LLVMConstantInteger.constantInteger(LLVMIntegerType.i1,
+								0, false), "orOp1");
+				LLVMBasicBlock nextCond = iffunc1.appendBasicBlock("next");
+				new LLVMBranchInstruction(builder, cmp1, nextCond, ifelse1);
+				builder.positionBuilderAtEnd(nextCond);
+				LLVMValue cmp2 = new LLVMIntegerComparison(builder,
+						LLVMIntPredicate.LLVMIntEQ, rhs,
+						LLVMConstantInteger.constantInteger(LLVMIntegerType.i1,
+								0, false), "orOp2");
+				new LLVMBranchInstruction(builder, cmp2, ifend1, ifelse1);
+			} else {
+				operandIncompatible = true;
+			}
 
 			return null;
 
 		case "&&":
-
-			long width3 = ((LLVMIntegerType) lhs.typeOf()).getWidth();
-			long width4 = ((LLVMIntegerType) lhs.typeOf()).getWidth();
-			if (width3 == 1 && width4 == 1) {
+			if (lw == 1 && rw == 1) {
 
 				LLVMValue cmp3 = new LLVMIntegerComparison(builder,
 						LLVMIntPredicate.LLVMIntEQ, lhs,
 						LLVMConstantInteger.constantInteger(LLVMIntegerType.i1,
 								0, false), "andOp1");
-				LLVMBasicBlock b1 = iffunc.appendBasicBlock("next");
-				new LLVMBranchInstruction(builder, cmp3, ifend, b1);
+				LLVMBasicBlock b1 = iffunc1.appendBasicBlock("next");
+				new LLVMBranchInstruction(builder, cmp3, ifend1, b1);
 				builder.positionBuilderAtEnd(b1);
 				LLVMValue cmp4 = new LLVMIntegerComparison(builder,
 						LLVMIntPredicate.LLVMIntEQ, rhs,
 						LLVMConstantInteger.constantInteger(LLVMIntegerType.i1,
 								0, false), "andOp2");
-				new LLVMBranchInstruction(builder, cmp4, ifend, ifelse);
+				new LLVMBranchInstruction(builder, cmp4, ifend1, ifelse1);
 			} else {
 				operandIncompatible = true;
 			}
@@ -825,8 +840,8 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(BreakStatement breakStatement) {
 		if (isForStatement) {
 			breakStatement.s.accept(this);
-			new LLVMBranchInstruction(builder, forEnd);
 			breakOrContStat = true;
+			new LLVMBranchInstruction(builder, forEnd1);
 		} else {
 			errorFlag = true;
 			System.err.println("Error: Break must be inside for statement");
@@ -838,8 +853,8 @@ public class VisitorImpl implements Visitor {
 	public LLVMValue visit(ContinueStatement continueStatement) {
 		if (isForStatement) {
 			continueStatement.s.accept(this);
-			new LLVMBranchInstruction(builder, forInc);
 			breakOrContStat = true;
+			new LLVMBranchInstruction(builder, forInc1);
 		} else {
 			errorFlag = true;
 			System.err.println("Error: Continue must be inside for statement");
@@ -860,12 +875,15 @@ public class VisitorImpl implements Visitor {
 				errorFlag = true;
 			} else {
 				LLVMValue position = location.expr.accept(this);
+				if (position.typeOf() instanceof LLVMPointerType) {
+					position = new LLVMLoadInstruction(builder, position, "tmp");
+				}
 				if (position.typeOf() instanceof LLVMIntegerType) {
 
 					LLVMValue in = LLVMConstantInteger.constantInteger(
 							LLVMIntegerType.i32, 0, false);
 					return new LLVMGetElementPointerInstruction(builder, val,
-							new LLVMValue[] { in, position }, "false");
+							new LLVMValue[] { in, position }, "arrayEle");
 
 				}
 				System.err.println("Invalid Array Position");
@@ -887,58 +905,57 @@ public class VisitorImpl implements Visitor {
 		LLVMValue initialVal = forStatement.expr1.accept(this);
 		LLVMValue condVal = forStatement.expr2.accept(this);
 		if (!operandIncompatible) {
-			forFunc = builder.getInsertBlock().getParent();
+			LLVMFunction forFunc = builder.getInsertBlock().getParent();
 
-			forCond = forFunc.appendBasicBlock("for.cond");
-			forBody = forFunc.appendBasicBlock("for.body");
-			forInc = forFunc.appendBasicBlock("for.inc");
-			forEnd = forFunc.appendBasicBlock("for.end");
-			if(condVal.typeOf() instanceof LLVMPointerType){
-				condVal=new LLVMLoadInstruction(builder, condVal, "%1");
+			LLVMBasicBlock forCond = forFunc.appendBasicBlock("for.cond");
+			if (condVal.typeOf() instanceof LLVMPointerType) {
+				condVal = new LLVMLoadInstruction(builder, condVal, "%1");
 			}
-			if (initialVal.typeOf() instanceof LLVMIntegerType
-					&& condVal.typeOf() instanceof LLVMIntegerType) {
-				LLVMValue cmpResult = null;
-
-				String id = forStatement.id.accept(this);
-				LLVMValue idVal = new LLVMStackAllocation(builder,
-						initialVal.typeOf(), null, id);
-				namedValues.put(id, idVal);
-				new LLVMStoreInstruction(builder, initialVal, idVal);
-
-				new LLVMBranchInstruction(builder, forCond);
-				builder.positionBuilderAtEnd(forCond);
-				cmpResult = new LLVMIntegerComparison(builder,
-						LLVMIntPredicate.LLVMIntSLT, new LLVMLoadInstruction(
-								builder, idVal, "tmp"), condVal,
-						"for condition");
-				new LLVMBranchInstruction(builder, cmpResult, forBody, forEnd);
-				builder.positionBuilderAtEnd(forBody);
-				forStatement.block.accept(this);
-				if (!breakOrContStat) {
-					new LLVMBranchInstruction(builder, forInc);
-				}
-				breakOrContStat = false;
-				builder.positionBuilderAtEnd(forInc);
-
-				LLVMValue newIdval = new LLVMAddInstruction(builder,
-						new LLVMLoadInstruction(builder, idVal, "tmp"),
-						LLVMConstantInteger.constantInteger(
-								LLVMIntegerType.i32, 1, false), false, "inc");
-
-				new LLVMStoreInstruction(builder, newIdval, idVal);
-
-				new LLVMBranchInstruction(builder, forCond);
-				builder.positionBuilderAtEnd(forEnd);
-			} else {
-				System.err
-						.println("Initial and Ending expression of for must be of integer type");
-				errorFlag = true;
+			if (initialVal.typeOf() instanceof LLVMPointerType) {
+				initialVal = new LLVMLoadInstruction(builder, initialVal, "%2");
 			}
+			LLVMValue cmpResult = null;
+
+			String id = forStatement.id.accept(this);
+			LLVMValue idVal = new LLVMStackAllocation(builder,
+					initialVal.typeOf(), null, id);
+			namedValues.put(id, idVal);
+			new LLVMStoreInstruction(builder, initialVal, idVal);
+
+			new LLVMBranchInstruction(builder, forCond);
+			builder.positionBuilderAtEnd(forCond);
+			cmpResult = new LLVMIntegerComparison(builder,
+					LLVMIntPredicate.LLVMIntSLT, new LLVMLoadInstruction(
+							builder, idVal, "tmp"), condVal, "cond");
+			LLVMBasicBlock forBody = forFunc.appendBasicBlock("for.body");
+			LLVMBasicBlock forEnd = forFunc.appendBasicBlock("for.end");
+			this.forEnd1 = forEnd;
+			new LLVMBranchInstruction(builder, cmpResult, forBody, forEnd);
+			builder.positionBuilderAtEnd(forBody);
+			forStatement.block.accept(this);
+			LLVMBasicBlock forInc = forFunc.appendBasicBlock("for.inc");
+			this.forInc1 = forInc;
+			if (!breakOrContStat) {
+				new LLVMBranchInstruction(builder, forInc);
+			}
+			breakOrContStat = false;
+			builder.positionBuilderAtEnd(forInc);
+
+			LLVMValue newIdval = new LLVMAddInstruction(builder,
+					new LLVMLoadInstruction(builder, idVal, "tmp"),
+					LLVMConstantInteger.constantInteger(LLVMIntegerType.i32, 1,
+							false), false, "inc");
+
+			new LLVMStoreInstruction(builder, newIdval, idVal);
+
+			new LLVMBranchInstruction(builder, forCond);
+			builder.positionBuilderAtEnd(forEnd);
 		} else {
+			System.err
+					.println("Initial and Ending expression of for must be of integer type");
 			errorFlag = true;
-			System.err.println("Incompatible Operands - For Condition");
 		}
+
 		isForStatement = false;
 
 		return null;
@@ -994,19 +1011,21 @@ public class VisitorImpl implements Visitor {
 					LLVMValue exprVal = null;
 					int i = 0;
 					for (ExpressionIntf expr : methodStatement2.exprs) {
-						
-						
+
 						exprVal = expr.accept(this);
-						if (exprVal instanceof LLVMStackAllocation)
+						if (exprVal.typeOf() instanceof LLVMPointerType)
 							args1[i++] = new LLVMLoadInstruction(builder,
 									exprVal, "1" + i);
 						else
 							args1[i++] = exprVal;
-						long lw=((LLVMIntegerType)args1[i-1].typeOf()).getWidth();
-						long rw=((LLVMIntegerType)f.getParameter(i-1).typeOf()).getWidth();
-						if(lw!=rw){
-							System.err.println("Formal and actual parameters are not type compatible");
-							errorFlag=true;
+						long lw = ((LLVMIntegerType) args1[i - 1].typeOf())
+								.getWidth();
+						long rw = ((LLVMIntegerType) f.getParameter(i - 1)
+								.typeOf()).getWidth();
+						if (lw != rw) {
+							System.err
+									.println("Formal and actual parameters are not type compatible");
+							errorFlag = true;
 							return null;
 						}
 					}
