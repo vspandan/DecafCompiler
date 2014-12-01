@@ -1,0 +1,86 @@
+class merget{
+	int arr[10]; int temp[10];
+
+	void mergeSort(int low,int mid,int high){
+
+		int i,m,k,l;
+
+		l=low;
+		i=low;
+		m=mid+1;
+
+		for tmp=0,999{
+			if((l<=mid)&&(m<=high)){
+
+				if(arr[l]<=arr[m]){
+					temp[i]=arr[l];
+					l+=1;
+				}
+				else{
+					temp[i]=arr[m];
+					m+=1;
+				}
+				i+=1;
+			}
+		}
+
+		if(l>mid){
+			k=m;
+			for tmp1=0,999{
+				if(k<=high){
+					temp[i]=arr[k];
+					i+=1;
+					k+=1;
+				}
+			}
+		}
+		else{
+			k=l;
+			for tmp1=0,999{
+				if(k<=mid){
+					temp[i]=arr[k];
+					i+=1;
+					k+=1;
+				}
+			}
+		}
+
+		for tmp2=low,(high+1){
+			arr[tmp2]=temp[tmp2];
+		}
+	}
+	void partition(int low,int high){
+
+		int mid;
+
+		if(low<high){
+			mid=(low+high)/2;
+			partition(low,mid);
+			partition(mid+1,high);
+			mergeSort(low,mid,high);
+		}
+	}	
+	int main(){
+
+		int n;
+		n=10;
+		arr[0]=90;
+		arr[1]=87;
+		arr[2]=109;
+		arr[3]=73;
+		arr[4]=38;
+		arr[5]=92;
+		arr[6]=73;
+		arr[7]=98;
+		arr[8]=100;
+		arr[9]=10;
+		partition(0,n-1);
+
+		for i=0,n {
+			callout("printf","-%d-",arr[i]);
+		}
+
+		return 0;
+	}
+}
+
