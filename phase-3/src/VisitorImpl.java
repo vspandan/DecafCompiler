@@ -658,7 +658,10 @@ public class VisitorImpl implements Visitor {
 				breakOrContStat = false;
 				builder.positionBuilderAtEnd(ifend);
 				ifElseStatement.elseBlock.accept(this);
-				new LLVMBranchInstruction(builder, ifelseend);
+				if (!breakOrContStat) {
+					new LLVMBranchInstruction(builder, ifelseend);
+				}
+				breakOrContStat = false;
 				builder.positionBuilderAtEnd(ifelseend);
 			} else {
 				builder.positionBuilderAtEnd(ifelse);
@@ -935,9 +938,9 @@ public class VisitorImpl implements Visitor {
 			this.forEnd1 = forEnd;
 			new LLVMBranchInstruction(builder, cmpResult, forBody, forEnd);
 			builder.positionBuilderAtEnd(forBody);
-			forStatement.block.accept(this);
 			LLVMBasicBlock forInc = forFunc.appendBasicBlock("for.inc");
 			this.forInc1 = forInc;
+			forStatement.block.accept(this);
 			if (!breakOrContStat) {
 				new LLVMBranchInstruction(builder, forInc);
 			}
