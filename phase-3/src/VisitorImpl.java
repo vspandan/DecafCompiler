@@ -215,6 +215,7 @@ public class VisitorImpl implements Visitor {
 			}
 			LLVMFunctionType FT = new LLVMFunctionType(typeLLVM, args, false);
 			f = new LLVMFunction(module, functionName, FT);
+			namedValues.put(functionName, f);
 
 			fblock = f.appendBasicBlock("entry");
 			builder.positionBuilderAtEnd(fblock);
@@ -235,7 +236,7 @@ public class VisitorImpl implements Visitor {
 				System.err.println("No Return Statement");
 				errorFlag = true;
 			}
-			namedValues.put(functionName, f);
+			//namedValues.put(functionName, f);
 			return f;
 
 		}
@@ -263,6 +264,7 @@ public class VisitorImpl implements Visitor {
 			}
 			LLVMFunctionType FT = new LLVMFunctionType(voidType, args, false);
 			f = new LLVMFunction(module, functionName, FT);
+			namedValues.put(functionName, f);
 
 			fblock = f.appendBasicBlock("entry");
 			builder.positionBuilderAtEnd(fblock);
@@ -276,7 +278,7 @@ public class VisitorImpl implements Visitor {
 			}
 			methodDeclaration2.block.accept(this);
 			new LLVMReturnInstruction(builder, null);
-			namedValues.put(functionName, f);
+			//namedValues.put(functionName, f);
 			return f;
 		}
 		return null;
@@ -589,11 +591,12 @@ public class VisitorImpl implements Visitor {
 		LLVMBasicBlock ifelse = iffunc.appendBasicBlock("if.then");
 		LLVMBasicBlock ifend = iffunc.appendBasicBlock("if.end");
 		
-		LLVMValue cond = ifStatement.expr.accept(this);
-		
 		this.iffunc1 = iffunc;
 		this.ifend1 = ifend;
 		this.ifelse1 = ifelse;
+		
+		LLVMValue cond = ifStatement.expr.accept(this);
+		
 		if (!operandIncompatible) {
 
 			if (cond != null) {
@@ -969,7 +972,7 @@ public class VisitorImpl implements Visitor {
 		LLVMFunction f = module.getNamedFunction(functionName);
 		if (f.getInstance() == null) {
 			System.err.println(functionName
-					+ ": Error: No such function exists");
+					+ ": Error: No such function exists; check order of function definitions");
 			errorFlag = true;
 		} else {
 			if (namedValues.containsKey(functionName)) {
@@ -983,7 +986,7 @@ public class VisitorImpl implements Visitor {
 				}
 			} else {
 				System.err
-						.println("Recurision is not implemented part of this language");
+						.println("Check order of functions defined");
 				errorFlag = true;
 			}
 		}
@@ -997,7 +1000,7 @@ public class VisitorImpl implements Visitor {
 		LLVMFunction f = module.getNamedFunction(functionName);
 		if (f.getInstance() == null) {
 			System.err.println(functionName
-					+ ": Error: No such function exists");
+					+ ": Error: No such function exists; check order of function definitions");
 			errorFlag = true;
 		} else {
 			if (namedValues.containsKey(functionName)) {
@@ -1034,7 +1037,7 @@ public class VisitorImpl implements Visitor {
 				}
 			} else {
 				System.err
-						.println("Recurision is not implemented part of this language");
+						.println("Check order of functions defined");
 				errorFlag = true;
 			}
 		}
